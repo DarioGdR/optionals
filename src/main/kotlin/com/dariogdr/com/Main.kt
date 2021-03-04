@@ -1,7 +1,5 @@
 package com.dariogdr.com
 
-import kotlinx.coroutines.runBlocking
-
 class Main {
 
     companion object {
@@ -9,7 +7,7 @@ class Main {
         fun main(args: Array<String>) = Main().start()
     }
 
-    fun start() = runBlocking {
+    fun start()  {
         print("I DID IT")
     }
 

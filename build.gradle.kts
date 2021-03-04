@@ -1,30 +1,31 @@
-val kotlinVersion = "1.4.0"
-val kotlinxVersion = "1.3.9"
-val jacksonVersion = "2.11.0"
 
-buildscript {}
 
 plugins {
-    kotlin("jvm") version ("1.4.0")
-    `java-library`
+    kotlin("jvm") version "1.4.21"
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.4"
 }
 
-val artifactName = project.name
-val artifactGroup = project.group.toString()
-val artifactVersion = project.version.toString()
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.getByName("main").allSource)
+}
 
-val pomUrl = "https://github.com/dariogdr/optionals"
-val pomScmUrl = "https://github.com/dariogdr/optionals"
-val pomIssueUrl = "https://github.com/dariogdr/optionals/issues"
-val pomDesc = "https://github.com/dariogdr/optionals"
+val artifactName = "optionals"
+val artifactGroup = "com.dariogdr"
 
-val githubRepo = "dariogdr/optionals"
-val githubReadme = "README.md"
+val pomUrl = "https://github.com/darioGdR/optionals/"
+val pomScmUrl = "https://github.com/darioGdR/optionals/"
+val pomIssueUrl = "https://github.com/darioGdR/optionals/"
+val pomDesc = "Optionals"
+val pomScmConnection = "https://github.com/darioGdR/optionals/"
+val pomScmDevConnection = "https://github.com/darioGdR/optionals/"
 
-val pomLicenseName = "MIT"
-val pomLicenseUrl = "https://opensource.org/licenses/mit-license.php"
+val githubRepo = "https://github.com/darioGdR/optionals/"
+val githubReadme = "https://github.com/darioGdR/optionals/README.md"
+
+val pomLicenseName = "The Apache Software License, Version 2.0"
+val pomLicenseUrl = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 val pomLicenseDist = "repo"
 
 val pomDeveloperId = "dariogdr"
@@ -32,109 +33,77 @@ val pomDeveloperName = "Dario GdR"
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            groupId = "com.dariogdr"
-            artifactId = "optionals"
+        create<MavenPublication>("lib") {
+            groupId = artifactGroup
+            artifactId = artifactName
             version = "1.0"
-
             from(components["java"])
-        }
-        create<MavenPublication>("mavenJava") {
-            pom {
-                name.set("My Library")
-                description.set("A concise description of my library")
-                url.set("http://www.dariogdr.com/")
-                properties.set(mapOf())
-                artifact(sourcesJar)
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("dariogdr")
-                        name.set("Dario Gdr")
-                        email.set("dgdr1991@gmail.com")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/dariogdr/optionals")
-                }
-            }
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
-        }
-        repositories {
-            maven {
-                url = uri("https://github.com/dariogdr/optionals")
-            }
+            artifact(sourcesJar)
 
+            pom.withXml {
+                asNode().apply {
+                    appendNode("description", pomDesc)
+                    appendNode("name", rootProject.name)
+                    appendNode("url", pomUrl)
+                    appendNode("licenses").appendNode("license").apply {
+                        appendNode("name", pomLicenseName)
+                        appendNode("url", pomLicenseUrl)
+                        appendNode("distribution", pomLicenseDist)
+                    }
+                    appendNode("developers").appendNode("developer").apply {
+                        appendNode("id", pomDeveloperId)
+                        appendNode("name", pomDeveloperName)
+                    }
+                    appendNode("scm").apply {
+                        appendNode("url", pomScmUrl)
+                        appendNode("connection", pomScmConnection)
+                    }
+                }
+            }
         }
     }
 }
 
+val bintrayUser = findProperty("bintrayUser") as String?
+val bintrayKey = findProperty("bintrayKey") as String?
 bintray {
-    user = project.findProperty("bintrayUser").toString()
-    key = project.findProperty("bintrayKey").toString()
+    // Getting bintray user and key from properties file or command line
+    user = bintrayUser
+    key = bintrayKey
+
+    // Automatic publication enabled
     publish = true
 
-    setPublications("optionals")
+    // Set maven publication onto bintray plugin
+    setPublications("lib")
 
+    // Configure package
     pkg.apply {
         repo = "optionals"
-        name = artifactName
-        userOrg = "dariogdr"
-        githubRepo = githubRepo
+        name = rootProject.name
+        userOrg = "dario-gdr"
+        setLicenses("Apache-2.0")
+        setLabels("Kotlin")
         vcsUrl = pomScmUrl
-        description = "Kotlin Optionals"
-        setLicenses("MIT")
-        desc = description
         websiteUrl = pomUrl
         issueTrackerUrl = pomIssueUrl
+        githubRepo = githubRepo
         githubReleaseNotesFile = githubReadme
 
+        // Configure version
         version.apply {
-            name = artifactVersion
+            name = "1.0"
             desc = pomDesc
-            vcsTag = artifactVersion
+            vcsTag = "1.0"
         }
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
-    mavenCentral()
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxVersion")
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
-
-val sourcesJar by tasks.creating(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.getByName("main").allSource)
 }
