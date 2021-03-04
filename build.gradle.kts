@@ -36,7 +36,7 @@ publishing {
         create<MavenPublication>("lib") {
             groupId = artifactGroup
             artifactId = artifactName
-            version = "1.0"
+            version = "1.1"
             from(components["java"])
             artifact(sourcesJar)
 
