@@ -8,7 +8,27 @@ plugins {
     kotlin("jvm") version ("1.4.0")
     `java-library`
     `maven-publish`
+    id("com.jfrog.bintray") version "1.8.4"
 }
+
+val artifactName = project.name
+val artifactGroup = project.group.toString()
+val artifactVersion = project.version.toString()
+
+val pomUrl = "https://github.com/dariogdr/optionals"
+val pomScmUrl = "https://github.com/dariogdr/optionals"
+val pomIssueUrl = "https://github.com/dariogdr/optionals/issues"
+val pomDesc = "https://github.com/dariogdr/optionals"
+
+val githubRepo = "dariogdr/optionals"
+val githubReadme = "README.md"
+
+val pomLicenseName = "MIT"
+val pomLicenseUrl = "https://opensource.org/licenses/mit-license.php"
+val pomLicenseDist = "repo"
+
+val pomDeveloperId = "dariogdr"
+val pomDeveloperName = "Dario GdR"
 
 publishing {
     publications {
@@ -21,13 +41,11 @@ publishing {
         }
         create<MavenPublication>("mavenJava") {
             pom {
-                name.set("Kotlin Optionals")
-                description.set("Kotlin Optionals")
-                url.set("https://github.com/dariogdr/optionals")
-                properties.set(
-                    mapOf(
-                    )
-                )
+                name.set("My Library")
+                description.set("A concise description of my library")
+                url.set("http://www.dariogdr.com/")
+                properties.set(mapOf())
+                artifact(sourcesJar)
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -40,6 +58,9 @@ publishing {
                         name.set("Dario Gdr")
                         email.set("dgdr1991@gmail.com")
                     }
+                }
+                scm {
+                    url.set("https://github.com/dariogdr/optionals")
                 }
             }
             versionMapping {
@@ -56,6 +77,34 @@ publishing {
                 url = uri("https://github.com/dariogdr/optionals")
             }
 
+        }
+    }
+}
+
+bintray {
+    user = project.findProperty("bintrayUser").toString()
+    key = project.findProperty("bintrayKey").toString()
+    publish = true
+
+    setPublications("optionals")
+
+    pkg.apply {
+        repo = "optionals"
+        name = artifactName
+        userOrg = "dariogdr"
+        githubRepo = githubRepo
+        vcsUrl = pomScmUrl
+        description = "Kotlin Optionals"
+        setLicenses("MIT")
+        desc = description
+        websiteUrl = pomUrl
+        issueTrackerUrl = pomIssueUrl
+        githubReleaseNotesFile = githubReadme
+
+        version.apply {
+            name = artifactVersion
+            desc = pomDesc
+            vcsTag = artifactVersion
         }
     }
 }
@@ -83,4 +132,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     kotlinOptions {
         jvmTarget = "11"
     }
+}
+
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.getByName("main").allSource)
 }
