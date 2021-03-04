@@ -6,12 +6,58 @@ buildscript {}
 
 plugins {
     kotlin("jvm") version ("1.4.0")
-    application
-    java
+    `java-library`
+    `maven-publish`
 }
 
-application {
-    mainClassName = "com.dariogdr.optionals.MainKt"
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.dariogdr"
+            artifactId = "optionals"
+            version = "1.0"
+
+            from(components["java"])
+        }
+        create<MavenPublication>("mavenJava") {
+            pom {
+                name.set("Kotlin Optionals")
+                description.set("Kotlin Optionals")
+                url.set("https://github.com/dariogdr/optionals")
+                properties.set(
+                    mapOf(
+                    )
+                )
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("dariogdr")
+                        name.set("Dario Gdr")
+                        email.set("dgdr1991@gmail.com")
+                    }
+                }
+            }
+            versionMapping {
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
+                }
+                usage("java-runtime") {
+                    fromResolutionResult()
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = uri("https://github.com/dariogdr/optionals")
+            }
+
+        }
+    }
 }
 
 java {
@@ -36,11 +82,5 @@ dependencies {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "11"
-    }
-}
-
-tasks.withType<Jar> {
-    manifest {
-        attributes(mapOf("Main-Class" to application.mainClassName))
     }
 }
